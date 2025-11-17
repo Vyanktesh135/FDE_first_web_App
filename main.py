@@ -13,3 +13,13 @@ async def health():
 @app.get("/render_test")
 async def render_test():
   return {"message" : "test completed"}
+
+@app.get("/add/")
+async def addition(a:int =0 ,b:int = 0):
+  print(a," + " , b)
+  return {"result" : a+b}
+
+@app.get("/multiply")
+async def multiply(a:int = 0, b:int = 0):
+  print(a," * ",b)
+  return {"result" : a*b}
