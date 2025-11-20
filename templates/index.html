@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FastAPI Static Test</title>
+  <!-- url_for uses the "static" mount name -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+  <h1>Home Page</h1>
+  <!-- <img src="{{ url_for('static', path='images/test.png') }}" alt="Logo" /> -->
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+</body>
+</html>

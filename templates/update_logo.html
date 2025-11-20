@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Company Logo Uploader (FastAPI)</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+  <div class="container2">
+    <h1>Company Logo Uploader</h1>
+
+    <div class="messages">
+      {% if msg %}
+        <div class="msg success">{{ msg }}</div>
+      {% endif %}
+      {% if error %}
+        <div class="msg error">{{ error }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Flex form -->
+    <form class="form-flex" action="/job-boards/update_logo" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="companyName">Company Name</label>
+        <input
+          type="text"
+          id="companyName"
+          name="companyName"
+          placeholder="Enter company name - "
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="companyLogo">Company Logo</label>
+        <input
+          type="file"
+          id="companyLogo"
+          name="companyLogo"
+          accept="image/*"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-save">Save Logo</button>
+    </form>
+  </div>
+</body>
+</html>
