@@ -12,6 +12,10 @@ from fastapi.responses import RedirectResponse
 import re
 from sqlalchemy import text
 from db import get_db_session
+from models import JobBoard,JobPost
+import logging
+logging.basicConfig()
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 app = FastAPI()
 class server_exception(Exception):
@@ -60,6 +64,16 @@ async def health():
     status = "Down"
   
   return {"status": "OK","Database":status}
+
+@app.get("/api/job_board")
+async def get_job():
+  try:
+    with get_db_session() as session:
+      job_board = session.query(JobBoard).all()
+      return job_board
+  except Exception as e:
+    print("Failed to execute query ..!",e)
+    raise server_exception("Internal Server Error")
 
 @app.get("/", response_class = HTMLResponse,name="home")
 async def home(request: Request):
@@ -232,69 +246,72 @@ async def job_boards(name:str,title:str,request: Request):
 @app.get("/api/job-boards/{name}")
 async def job_boards(name:str,response:Response ):
   try:
-    print("Name of Company",name)
-    jd = {
-      "acme":[{"title":"Customer Support Executive"},{"title":"Project Manager"}] , 
-      "bcg":[{"title":"Technical Architect"},{"title":"Junior Software Developer"}],
-      "atlas": [
+    # print("Name of Company",name)
+    # jd = {
+    #   "acme":[{"title":"Customer Support Executive"},{"title":"Project Manager"}] , 
+    #   "bcg":[{"title":"Technical Architect"},{"title":"Junior Software Developer"}],
+    #   "atlas": [
             
-            {
-                "title": "Customer Support Executive",
-                "description": "Responsible for assisting customers by resolving product or service inquiries, providing accurate information, handling complaints, and ensuring high customer satisfaction through effective communication and problem-solving."
-            },
-            {
-                "title": "Project Manager",
-                "description": "Oversees project planning, execution, monitoring, and delivery while managing teams, resources, budgets, and timelines. Ensures project objectives are met, risks are mitigated, and stakeholders are consistently updated."
-            },
-            {
-                "title": "Software Engineer",
-                "description": "Designs, develops, tests, and maintains software applications. Collaborates with cross-functional teams to build reliable, scalable, and efficient systems."
-            },
-            {
-                "title": "Data Analyst",
-                "description": "Collects, processes, and analyzes data to uncover trends, support business decisions, and generate actionable insights using statistical and analytical tools."
-            },
-            {
-                "title": "Human Resources Executive",
-                "description": "Manages recruitment, onboarding, employee relations, performance evaluations, and compliance to maintain a healthy organizational environment."
-            },
-            {
-                "title": "Digital Marketing Specialist",
-                "description": "Plans and executes digital marketing campaigns, manages social media presence, analyzes campaign performance, and drives online engagement and brand awareness."
-            },
-            {
-                "title": "UI/UX Designer",
-                "description": "Creates user-centric designs by conducting research, building wireframes, and developing intuitive interfaces that enhance the overall user experience."
-            },
-            {
-                "title": "Sales Manager",
-                "description": "Develops and executes sales strategies, manages sales teams, monitors performance, builds client relationships, and ensures revenue targets are achieved."
-            },
-            {
-                "title": "Network Administrator",
-                "description": "Maintains and monitors computer networks, ensures system stability and security, troubleshoots network issues, and manages network hardware and software."
-            },
-            {
-                "title": "Content Writer",
-                "description": "Produces clear, engaging, and SEO-friendly content for blogs, websites, marketing materials, and social media to support brand communication goals."
-            },
-            {
-                "title": "Accountant",
-                "description": "Handles financial records, prepares reports, manages budgets, ensures compliance with financial regulations, and supports audits and tax preparation."
-            },
-            {
-                "title": "Business Development Executive",
-                "description": "Identifies new business opportunities, builds partnerships, expands the client base, and contributes to strategic growth initiatives."
-            }
-          ]
-      }
-    # if name in jd.keys():
-    #   return jd[name]
-    # else:
-    #   response.status_code = 404
-    #   return {"error": "Not Found - Resource not available."}
-    return jd[name]
-      
+    #         {
+    #             "title": "Customer Support Executive",
+    #             "description": "Responsible for assisting customers by resolving product or service inquiries, providing accurate information, handling complaints, and ensuring high customer satisfaction through effective communication and problem-solving."
+    #         },
+    #         {
+    #             "title": "Project Manager",
+    #             "description": "Oversees project planning, execution, monitoring, and delivery while managing teams, resources, budgets, and timelines. Ensures project objectives are met, risks are mitigated, and stakeholders are consistently updated."
+    #         },
+    #         {
+    #             "title": "Software Engineer",
+    #             "description": "Designs, develops, tests, and maintains software applications. Collaborates with cross-functional teams to build reliable, scalable, and efficient systems."
+    #         },
+    #         {
+    #             "title": "Data Analyst",
+    #             "description": "Collects, processes, and analyzes data to uncover trends, support business decisions, and generate actionable insights using statistical and analytical tools."
+    #         },
+    #         {
+    #             "title": "Human Resources Executive",
+    #             "description": "Manages recruitment, onboarding, employee relations, performance evaluations, and compliance to maintain a healthy organizational environment."
+    #         },
+    #         {
+    #             "title": "Digital Marketing Specialist",
+    #             "description": "Plans and executes digital marketing campaigns, manages social media presence, analyzes campaign performance, and drives online engagement and brand awareness."
+    #         },
+    #         {
+    #             "title": "UI/UX Designer",
+    #             "description": "Creates user-centric designs by conducting research, building wireframes, and developing intuitive interfaces that enhance the overall user experience."
+    #         },
+    #         {
+    #             "title": "Sales Manager",
+    #             "description": "Develops and executes sales strategies, manages sales teams, monitors performance, builds client relationships, and ensures revenue targets are achieved."
+    #         },
+    #         {
+    #             "title": "Network Administrator",
+    #             "description": "Maintains and monitors computer networks, ensures system stability and security, troubleshoots network issues, and manages network hardware and software."
+    #         },
+    #         {
+    #             "title": "Content Writer",
+    #             "description": "Produces clear, engaging, and SEO-friendly content for blogs, websites, marketing materials, and social media to support brand communication goals."
+    #         },
+    #         {
+    #             "title": "Accountant",
+    #             "description": "Handles financial records, prepares reports, manages budgets, ensures compliance with financial regulations, and supports audits and tax preparation."
+    #         },
+    #         {
+    #             "title": "Business Development Executive",
+    #             "description": "Identifies new business opportunities, builds partnerships, expands the client base, and contributes to strategic growth initiatives."
+    #         }
+    #       ]
+    #   }
+    # # if name in jd.keys():
+    # #   return jd[name]
+    # # else:
+    # #   response.status_code = 404
+    # #   return {"error": "Not Found - Resource not available."}
+    # return jd[name]
+    with get_db_session() as session:
+      jobPosts = session.query(JobPost).join(JobPost.job_board).filter(JobBoard.slug.__eq__(name)).all()
+      # print(jobPosts.statement.compile(compile_kwargs={"literal_binds": True}))
+      return jobPosts
   except Exception as e:
     print("Error while processing the request",e)
     raise server_exception(name = "Internal Server Error")
@@ -370,3 +387,9 @@ async def vite_testing():
     print("Error while processing the request",e)
     raise server_exception(name = "Internal Server Error")
   return {"title":""}
+
+@app.get("/api/job-boards/{job_board_id}/job-posts")
+async def api_company_job_board(job_board_id):
+  with get_db_session() as session:
+     jobPosts = session.query(JobPost).filter(JobPost.job_board_id.__eq__(job_board_id)).all()
+     return jobPosts
