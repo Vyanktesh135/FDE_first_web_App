@@ -10,6 +10,8 @@ from fastapi import UploadFile,File,Form
 import os
 from fastapi.responses import RedirectResponse
 import re
+from sqlalchemy import text
+from db import get_db_session
 
 app = FastAPI()
 class server_exception(Exception):
@@ -46,7 +48,18 @@ async def server_exception_handler(request: Request, exc: server_exception):
 
 @app.get("/health")
 async def health():
-  return {"status": "ok"}
+  status = "Down"
+  try:
+    with get_db_session() as session:
+        session.execute(text("SELECT 1"))
+        print("All good!")
+        status = "OK"
+  except Exception as e:
+    # raise server_exception(name = "Internal Server Error")
+    print(e)
+    status = "Down"
+  
+  return {"status": "OK","Database":status}
 
 @app.get("/", response_class = HTMLResponse,name="home")
 async def home(request: Request):
