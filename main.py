@@ -523,14 +523,12 @@ async def update_job_boards(item_id:int ,payload: Annotated[JobBoardForm , Form(
     
     os.makedirs(upload_folder,exist_ok=True)
     file_path = os.path.join(upload_folder,f"{payload.slug}.{extension}")
+    contents = await payload.logo.read()
 
-    with open(file_path,"wb") as file:
-      file.write(await payload.logo.read())
-    
-    file_path = file_path.replace("\\","/")
-    print(file_path)
+    result_path = upload_file(settings.SUPABASE_BUCKET, file_path, contents, payload.logo.content_type)
+    print(result_path)
 
-    result.logo = file_path
+    result.logo = result_path
     db.add(result)
     db.commit()
     print(result)
