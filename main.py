@@ -513,8 +513,8 @@ async def update_job_boards(item_id:int ,payload: Annotated[JobBoardForm , Form(
       )
      
     upload_folder = os.path.join("static","images")
-    # extension = payload.logo.filename.split(".")[1]
-    extension = payload.logo.content_type
+    extension = payload.logo.filename.split(".")[1]
+    # extension = payload.logo.content_type
     if extension not in {"png","jpg","jpeg","gif"}:
       return JSONResponse(
         status_code=status.HTTP_406_NOT_ACCEPTABLE,
