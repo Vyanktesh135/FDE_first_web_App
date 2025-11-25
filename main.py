@@ -30,7 +30,7 @@ class server_exception(Exception):
 #Mounting Static Assets
 if not settings.PRODUCTION:
   app.mount("/static",StaticFiles(directory="static"),name = "static")
-templates = Jinja2Templates(directory="templates")
+# templates = Jinja2Templates(directory="templates")
 
 supabase: Client = create_client(str(settings.SUPABASE_URL), settings.SUPABASE_KEY)
 
@@ -111,7 +111,8 @@ async def get_job():
 
 @app.get("/", response_class = HTMLResponse,name="home")
 async def home(request: Request):
-  return templates.TemplateResponse("index.html",{"request":request})
+  # return templates.TemplateResponse("index.html",{"request":request})
+  return {"Message":"From Hello Page"}
 
 @app.get("/render_test")
 async def render_test():
@@ -127,9 +128,9 @@ async def multiply(payload: Calc_data):
   print(payload)
   return {"result" : payload.a * payload.b}
 
-@app.get("/api/job-boards/upload",response_class=HTMLResponse,name="get_logo")
-async def upload(request: Request):
-  return templates.TemplateResponse("update_logo.html",{"request":request})
+# @app.get("/api/job-boards/upload",response_class=HTMLResponse,name="get_logo")
+# async def upload(request: Request):
+#   return templates.TemplateResponse("update_logo.html",{"request":request})
 
 @app.post("/api/job-boards/update_logo",response_class = HTMLResponse,name="update_logo")
 async def updated_logo(
@@ -180,101 +181,101 @@ async def updated_logo(
   return RedirectResponse(f"{url}?msg={msg.replace(' ', '%20')}", status_code=303)
 
 #Query Parameters
-@app.get("/api/job-boards")
-async def job_boards(name:str,title:str,request: Request):
-  try:
-    print("Name of Company",name)
-    acme_title = ["Customer Support Executive","Project Manager"]  
-    bcg_title = ["Technical Architect","Junior Software Developer"]
-    atlas = [
-      # {"title": "Customer Support Executive"},
-      {
-          "title": "Customer Support Executive",
-          "description": "Responsible for assisting customers by resolving product or service inquiries, providing accurate information, handling complaints, and ensuring high customer satisfaction through effective communication and problem-solving."
-      },
-      {
-          "title": "Project Manager",
-          "description": "Oversees project planning, execution, monitoring, and delivery while managing teams, resources, budgets, and timelines. Ensures project objectives are met, risks are mitigated, and stakeholders are consistently updated."
-      },
-      {
-          "title": "Software Engineer",
-          "description": "Designs, develops, tests, and maintains software applications. Collaborates with cross-functional teams to build reliable, scalable, and efficient systems."
-      },
-      {
-          "title": "Data Analyst",
-          "description": "Collects, processes, and analyzes data to uncover trends, support business decisions, and generate actionable insights using statistical and analytical tools."
-      },
-      {
-          "title": "Human Resources Executive",
-          "description": "Manages recruitment, onboarding, employee relations, performance evaluations, and compliance to maintain a healthy organizational environment."
-      },
-      {
-          "title": "Digital Marketing Specialist",
-          "description": "Plans and executes digital marketing campaigns, manages social media presence, analyzes campaign performance, and drives online engagement and brand awareness."
-      },
-      {
-          "title": "UI/UX Designer",
-          "description": "Creates user-centric designs by conducting research, building wireframes, and developing intuitive interfaces that enhance the overall user experience."
-      },
-      {
-          "title": "Sales Manager",
-          "description": "Develops and executes sales strategies, manages sales teams, monitors performance, builds client relationships, and ensures revenue targets are achieved."
-      },
-      {
-          "title": "Network Administrator",
-          "description": "Maintains and monitors computer networks, ensures system stability and security, troubleshoots network issues, and manages network hardware and software."
-      },
-      {
-          "title": "Content Writer",
-          "description": "Produces clear, engaging, and SEO-friendly content for blogs, websites, marketing materials, and social media to support brand communication goals."
-      },
-      {
-          "title": "Accountant",
-          "description": "Handles financial records, prepares reports, manages budgets, ensures compliance with financial regulations, and supports audits and tax preparation."
-      },
-      {
-          "title": "Business Development Executive",
-          "description": "Identifies new business opportunities, builds partnerships, expands the client base, and contributes to strategic growth initiatives."
-      }
-    ]
-    result = []
-    if name == "acme":
-      for job in acme_title:
-        result.append({"title":job})
+# @app.get("/api/job-boards")
+# async def job_boards(name:str,title:str,request: Request):
+#   try:
+#     print("Name of Company",name)
+#     acme_title = ["Customer Support Executive","Project Manager"]  
+#     bcg_title = ["Technical Architect","Junior Software Developer"]
+#     atlas = [
+#       # {"title": "Customer Support Executive"},
+#       {
+#           "title": "Customer Support Executive",
+#           "description": "Responsible for assisting customers by resolving product or service inquiries, providing accurate information, handling complaints, and ensuring high customer satisfaction through effective communication and problem-solving."
+#       },
+#       {
+#           "title": "Project Manager",
+#           "description": "Oversees project planning, execution, monitoring, and delivery while managing teams, resources, budgets, and timelines. Ensures project objectives are met, risks are mitigated, and stakeholders are consistently updated."
+#       },
+#       {
+#           "title": "Software Engineer",
+#           "description": "Designs, develops, tests, and maintains software applications. Collaborates with cross-functional teams to build reliable, scalable, and efficient systems."
+#       },
+#       {
+#           "title": "Data Analyst",
+#           "description": "Collects, processes, and analyzes data to uncover trends, support business decisions, and generate actionable insights using statistical and analytical tools."
+#       },
+#       {
+#           "title": "Human Resources Executive",
+#           "description": "Manages recruitment, onboarding, employee relations, performance evaluations, and compliance to maintain a healthy organizational environment."
+#       },
+#       {
+#           "title": "Digital Marketing Specialist",
+#           "description": "Plans and executes digital marketing campaigns, manages social media presence, analyzes campaign performance, and drives online engagement and brand awareness."
+#       },
+#       {
+#           "title": "UI/UX Designer",
+#           "description": "Creates user-centric designs by conducting research, building wireframes, and developing intuitive interfaces that enhance the overall user experience."
+#       },
+#       {
+#           "title": "Sales Manager",
+#           "description": "Develops and executes sales strategies, manages sales teams, monitors performance, builds client relationships, and ensures revenue targets are achieved."
+#       },
+#       {
+#           "title": "Network Administrator",
+#           "description": "Maintains and monitors computer networks, ensures system stability and security, troubleshoots network issues, and manages network hardware and software."
+#       },
+#       {
+#           "title": "Content Writer",
+#           "description": "Produces clear, engaging, and SEO-friendly content for blogs, websites, marketing materials, and social media to support brand communication goals."
+#       },
+#       {
+#           "title": "Accountant",
+#           "description": "Handles financial records, prepares reports, manages budgets, ensures compliance with financial regulations, and supports audits and tax preparation."
+#       },
+#       {
+#           "title": "Business Development Executive",
+#           "description": "Identifies new business opportunities, builds partnerships, expands the client base, and contributes to strategic growth initiatives."
+#       }
+#     ]
+#     result = []
+#     if name == "acme":
+#       for job in acme_title:
+#         result.append({"title":job})
       
-    elif name == "bcg":
-      for job in bcg_title:
-        result.append({"title":job})
+#     elif name == "bcg":
+#       for job in bcg_title:
+#         result.append({"title":job})
       
-    elif name == "atlas":
-      for item in atlas:
-        result.append({
-          "title" : item["title"],
-          "description": item["description"]
-        })
-    else:
-      result.append({
-        "title":"No title to display please provide correct name"
-      })
+#     elif name == "atlas":
+#       for item in atlas:
+#         result.append({
+#           "title" : item["title"],
+#           "description": item["description"]
+#         })
+#     else:
+#       result.append({
+#         "title":"No title to display please provide correct name"
+#       })
     
-    return templates.TemplateResponse(
-      "job_boards.html",
-      {
-        "request":request,
-        "details": result,
-        "company": name,
-        "src_title":title,
-      }
-    )
+#     return templates.TemplateResponse(
+#       "job_boards.html",
+#       {
+#         "request":request,
+#         "details": result,
+#         "company": name,
+#         "src_title":title,
+#       }
+#     )
   
-  except Exception as e:
-    print("Error while processing the request",e)
-    raise HTTPException(
-      status_code=500,
-      detail = f"Not able to process the request at the moment"
-    )
+#   except Exception as e:
+#     print("Error while processing the request",e)
+#     raise HTTPException(
+#       status_code=500,
+#       detail = f"Not able to process the request at the moment"
+#     )
   
-  return {"title":""}
+#   return {"title":""}
 
 #Path Parameters
 @app.get("/api/job-boards/{name}")
