@@ -537,7 +537,7 @@ async def update_job_boards(item_id:int ,payload: Annotated[JobBoardForm , Form(
       status_code=status.HTTP_200_OK,
       content={
         "slug":payload.slug,
-        "updated_url":file_path
+        "updated_url":result_path
       } 
     )
   except Exception as e:
