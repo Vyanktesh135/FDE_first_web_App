@@ -1,7 +1,7 @@
 """New column addition in job_board c
 
 Revision ID: 88cd42870e23
-Revises: a011d4ab0d87
+Revises: f9fc52e991c6
 Create Date: 2025-11-24 16:31:33.144276
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '88cd42870e23'
-down_revision: Union[str, Sequence[str], None] = 'a011d4ab0d87'
+down_revision: Union[str, Sequence[str], None] = 'f9fc52e991c6'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
