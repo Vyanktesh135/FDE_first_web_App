@@ -1,0 +1,24 @@
+meta {
+  name: Adding Job application
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BASE_URL}}/api/job-application
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  job_post_id: 3
+  resume: @file(C:\Users\vyanktesh.l\Downloads\Ravi Patel Resume.docx)
+  first_name: Ravi
+  last_name: Patel
+  email: ravipatel123@gmail.com
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

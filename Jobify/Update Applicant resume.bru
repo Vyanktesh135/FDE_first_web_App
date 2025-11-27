@@ -1,0 +1,20 @@
+meta {
+  name: Update Applicant resume
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{BASE_URL}}/api/job-application/resume-edit/1
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  resume: @file(C:\Users\vyanktesh.l\Downloads\atlasai.png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

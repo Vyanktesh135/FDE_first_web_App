@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: AnyUrl
     SUPABASE_KEY: str
     SUPABASE_BUCKET: str
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

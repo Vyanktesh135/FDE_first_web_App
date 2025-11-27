@@ -1,0 +1,20 @@
+meta {
+  name: Update Job logo 1
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{BASE_URL}}/api/job-boards/logo/15
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  logo: @file(C:\Users\vyanktesh.l\Downloads\prodapt.png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

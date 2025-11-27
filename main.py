@@ -12,13 +12,16 @@ from fastapi.responses import RedirectResponse,FileResponse
 import re
 from sqlalchemy import text
 from db import get_db_session
-from models import JobBoard,JobPost
+from models import JobBoard,JobPost,JobApplication
 import logging
 from typing import Annotated
 from pydantic import BaseModel, Field, field_validator
 from pathlib import Path
 from config import settings
 from supabase import Client,create_client
+import string
+import secrets
+from auth import authenticate_admin
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
@@ -47,6 +50,72 @@ def upload_file(bucket_name, path, contents, content_type):
     result_path = path.replace("\\","/")
     return result_path
 
+def validate_extensions(extension,expected_extention):
+  if extension not in expected_extention:
+    return JSONResponse(
+      status_code=status.HTTP_406_NOT_ACCEPTABLE,
+      content={"Message":f"Please provide the file with correct extension {expected_extention}"}
+    )
+  return True
+
+def secure_random_string(length=12):
+    chars = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(length))
+
+def insert_to_db(data,session = None):
+  try:
+    if session:
+      db_session = session
+    else:
+      db_session = get_db_session()
+    db_session.add(data)
+    db_session.commit()
+    db_session.refresh(data)
+    print("Data is inserted to DB ..!")
+    return True
+  except Exception as e:
+    print(e)
+    raise server_exception("Failed to insert to DB ..!")
+  finally:
+    if db_session:
+      db_session.close()
+      print("Session has been closed")
+ 
+def job_is_closed(id):
+  try:
+    db_session = get_db_session()
+    result = db_session.query(JobPost).filter(JobPost.id == id).first()
+    if result:
+      return {
+        "status": True if result.job_post_status == 'closed' else False,
+        "post": result.title
+      }
+    else:
+      return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content = {"Message" : f"Job post id:{result.id} not available please provide the correct one"}
+      )
+  except Exception as e:
+    print(e)
+    raise server_exception("Failed to check the Job status")
+  finally:
+    if db_session:
+      db_session.close()
+      print("Session closed ..!")
+
+def get_details(object):
+  try:
+    db_session = get_db_session()
+    result = db_session.query(object).all()
+    return result
+  except Exception as e:
+    print(e)
+    raise server_exception(f"Failed to get the data from {object}")
+  finally:
+    if db_session:
+      db_session.close()
+      print("Session is closed ..!")  
+
 class Calc_data(BaseModel):
   a: int = Field(...,ge=1,le=3)
   b: int = Field(...,ge=1,le=3)
@@ -59,6 +128,26 @@ class JobBoardForm(BaseModel):
   @classmethod
   def to_lowercase(cls,v):
     return v.lower()
+
+class JobBoardUpdateSlug(BaseModel):
+  slug: str = Field(...,min=3,max_length=20)
+  @field_validator('slug')
+  @classmethod
+  def to_lowercase(cls,v):
+    return v.lower()
+
+class JobBoardUpdateLogo(BaseModel):
+  logo: UploadFile = Field(...,)
+
+class job_application(BaseModel):
+  job_post_id :int = Field(...,ge=1,le=5)
+  first_name :str =  Field(...,min_length=3,max_length=20)
+  last_name :str =  Field(...,min_length=3,max_length=20)
+  email : str = Field(...,min_length=3,max_length=40)
+  resume : UploadFile = Field(...)
+
+class JobApplicationResumeUpdate(BaseModel):
+   resume : UploadFile = Field(...)
 
 @app.exception_handler(server_exception)
 async def server_exception_handler(request: Request, exc: server_exception):
@@ -98,16 +187,6 @@ async def health():
     status = "Down"
   
   return {"status": "OK","Database":status}
-
-@app.get("/api/job_board")
-async def get_job():
-  try:
-    with get_db_session() as session:
-      job_board = session.query(JobBoard).all()
-      return job_board
-  except Exception as e:
-    print("Failed to execute query ..!",e)
-    raise server_exception("Internal Server Error")
 
 @app.get("/", response_class = HTMLResponse,name="home")
 async def home(request: Request):
@@ -423,12 +502,6 @@ async def vite_testing():
     raise server_exception(name = "Internal Server Error")
   return {"title":""}
 
-# @app.get("/api/job-boards/{job_board_id}/job-posts")
-# async def api_company_job_board(job_board_id):
-#   with get_db_session() as session:
-#      jobPosts = session.query(JobPost).filter(JobPost.job_board_id.__eq__(job_board_id)).all()
-#      return jobPosts
-
 @app.get('/api/job-boards/{id}/job-posts')
 async def api_to_get_jobposts(id:int = 0):
   print('*****************',id,f'Type - {type(id)}******************************')
@@ -438,31 +511,25 @@ async def api_to_get_jobposts(id:int = 0):
     print("\n************* Output is ************ ",jobPosts)
     return jobPosts
   
-# @app.post("/api/job-boards")
-# async def create_new_job_boards(request: Request):
-#   try:
-#     body = await request.body()
-#     raw_text = body.decode()
-#     print(raw_text)
-#     print(request.headers.get('content-type'))
-#     return JSONResponse(
-#       status_code= status.HTTP_200_OK,
-#       content= {
-#         "message" : "OK"
-#       }
-#     )
-#   except Exception as e:
-#     print(e)
-#     raise server_exception("Internal Server Error: Failed to create the job_board")
-  
-# @app.post("/api/job-boards")
-# async def create_new_job_boards(slug: Annotated[str, Form()]):
-#   try:
-#     return {"slug":slug}
-#   except Exception as e:
-#     print(e)
-#     raise server_exception("Internal Server Error: Failed to create the job_board")
+#*********************************************************************************
+#Job Boards
+#*********************************************************************************
+class AdminLoginForm(BaseModel):
+   username : str
+   password : str
 
+@app.post("/api/admin-login")
+async def admin_login(response: Response, admin_login_form: Annotated[AdminLoginForm, Form()]):
+   auth_response = authenticate_admin(admin_login_form.username, admin_login_form.password)
+   if auth_response is not None:
+      secure = settings.PRODUCTION
+      response.set_cookie(key="admin_session", value=auth_response, httponly=True, secure=secure, samesite="Lax")
+      return {}
+   else:
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+#*********************************************************************************
+#Job Boards
+#*********************************************************************************
 @app.post("/api/job-boards")
 async def create_new_job_boards(payload: Annotated[JobBoardForm , Form()]):
   try:
@@ -501,48 +568,85 @@ async def create_new_job_boards(payload: Annotated[JobBoardForm , Form()]):
     print(e)
     raise server_exception("Internal Server Error: Failed to create the job_board")
 
-@app.put("/api/job-boards/{item_id}")
-async def update_job_boards(item_id:int ,payload: Annotated[JobBoardForm , Form()]):
+@app.get("/api/job_board")
+async def get_job():
   try:
+    with get_db_session() as session:
+      job_board = session.query(JobBoard).all()
+      return job_board
+  except Exception as e:
+    print("Failed to execute query ..!",e)
+    raise server_exception("Internal Server Error")
+
+@app.put("/api/job-boards/slug/{item_id}")
+async def update_job_boards_logo(item_id:int ,payload: Annotated[JobBoardUpdateSlug , Form()]):
+  try:
+    #check weather its available in DB
     db = get_db_session()
-    result = db.query(JobBoard).filter(JobBoard.slug == payload.slug, JobBoard.id == item_id).first()
+    result = db.query(JobBoard).filter(JobBoard.id == item_id).first()
     if not result:
       return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content = ( {"Details":f"{payload.slug} with item_id {item_id} not present ..!"})
+        content = ( {"Details":f"Job board with item_id {item_id} not present ..!"})
       )
-     
-    upload_folder = os.path.join("static","images")
-    extension = payload.logo.filename.split(".")[1]
-    # extension = payload.logo.content_type
-    if extension not in {"png","jpg","jpeg","gif"}:
-      return JSONResponse(
-        status_code=status.HTTP_406_NOT_ACCEPTABLE,
-        content = ( {"Details":"Please provide the correct exensions ['png','jpg','jpeg','gif'] ..!"})
-      )
-    
-    os.makedirs(upload_folder,exist_ok=True)
-    file_path = os.path.join(upload_folder,f"{payload.slug}.{extension}")
-    contents = await payload.logo.read()
-
-    result_path = upload_file(settings.SUPABASE_BUCKET, file_path, contents, payload.logo.content_type)
-    print(result_path)
-
-    result.logo = result_path
-    db.add(result)
-    db.commit()
-    print(result)
-    # db.
+    #Update Logo
+    result.slug = payload.slug
+    insert_to_db(result,db)
     return JSONResponse(
       status_code=status.HTTP_200_OK,
       content={
-        "slug":payload.slug,
-        "updated_url":result_path
+        "slug":payload.slug
       } 
     )
   except Exception as e:
     print(e)
     raise server_exception("Internal Server Error: Failed to update the job_board")
+  finally:
+    if db:
+      db.close()
+      print("Session closed ..!")
+
+@app.put("/api/job-boards/logo/{item_id}")
+async def update_job_boards_logo(item_id:int ,payload: Annotated[JobBoardUpdateLogo,Form()]):
+  try:
+    #check weather its available in DB
+    db = get_db_session()
+    result = db.query(JobBoard).filter(JobBoard.id == item_id).first()
+    if not result:
+      return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content = ( {"Details":f"Job Board with item_id {item_id} not present ..!"})
+      )
+    
+    #Validate the extension
+    extension = payload.logo.filename.split(".")[1] 
+    validate_extensions( extension.lower(), ["png","jpg","jpeg","gif"])
+    
+    #Upload file
+    upload_folder = os.path.join("static","images")
+    os.makedirs(upload_folder,exist_ok=True)
+    generated_name = f"logo_{secure_random_string()}.{extension}"
+    file_path = os.path.join(upload_folder,generated_name)
+    contents = await payload.logo.read()
+    result_path = upload_file(settings.SUPABASE_BUCKET, file_path, contents, payload.logo.content_type)
+    print(result_path)
+
+    #Update Logo
+    result.logo = result_path
+    insert_to_db(result,db)
+    return JSONResponse(
+      status_code=status.HTTP_200_OK,
+      content={
+        "logo":result_path
+      } 
+    )
+  except Exception as e:
+    print(e)
+    raise server_exception("Internal Server Error: Failed to update the job_board")
+  finally:
+    if db:
+      db.close()
+      print("Session closed ..!")
 
 @app.delete("/api/job-boards/{item_id}")
 async def delete_job_boards(item_id: int):
@@ -573,6 +677,118 @@ async def delete_job_boards(item_id: int):
   except Exception as e:
     print(e)
     raise server_exception("Internal Server Error: Failed to create the job_board")
+#*******************************************
+#Job Applications
+#*******************************************
+@app.get("/api/job-application")
+async def get_all_job_application():
+  try:
+    result = get_details(JobApplication)
+    print("\n\n Data : ", result)
+    return result
+  except Exception as e:
+    print("Failed to get applications : ",e)
+    raise server_exception("Failed to get the details: Internal server error ..!")
+
+@app.post("/api/job-application")
+async def create_application(payload: Annotated[job_application , Form()]):
+  try:
+
+    #check if Job Post is CLOSED
+    result = job_is_closed(payload.job_post_id)
+    if result['status']:
+      return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"Message":f"Job Post {result['post']} is closed ..!"}
+      )
+
+    #Validate the extension
+    extension = payload.resume.filename.split(".")[1] 
+    validate_extensions( extension.lower(), ['pdf','doc','docx','.odt'])
+    
+    #Upload the file
+    resume_content = await payload.resume.read()
+    upload_folder = os.path.join('static','resume')
+    os.makedirs(upload_folder,exist_ok=True)
+    first_name = payload.first_name
+    resume_name = f"{first_name}_{secure_random_string()}.{extension}"
+    save_path = os.path.join(upload_folder,resume_name)
+    result_path = upload_file(settings.SUPABASE_BUCKET, save_path, resume_content, payload.resume.content_type)
+
+    #Logg data to database
+    data = JobApplication(job_post_id=payload.job_post_id,
+                          first_name=payload.first_name,
+                          last_name=payload.last_name,
+                          email=payload.email,
+                          resume=result_path)
+    insert_to_db(data)
+    return JSONResponse(
+      status_code=status.HTTP_200_OK,
+      content={"Message":f"Application is submitted for job_post_id: {payload.job_post_id}"}
+    )
+  except Exception as e:
+    print(e)
+    raise server_exception("Failed to create job application : Internal server error")
+
+@app.put("/api/job-application/resume-edit/{id}")
+async def edit_application(id: int ,payload: Annotated[JobApplicationResumeUpdate, Form()]):
+  try:
+    #check weather is application availkable to edit
+    db_session = get_db_session()
+    result = db_session.query(JobApplication).filter(JobApplication.id == id).first()
+    if not result:
+      return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        conetent = {"error": f"Job Application with {id} not awailable"}
+      )
+    
+    #check the extension
+    extension = payload.resume.filename.split(".")[-1]
+    print(extension)
+    validate_extensions(extension.lower(),['pdf','doc','docx','odt'])
+    content = await payload.resume.read()
+    upload_folder = os.path.join("static","resume")
+    random_string = secure_random_string()
+    save_path = os.path.join(upload_folder,f"resume_{random_string}.{extension}")
+    result_path = upload_file(settings.SUPABASE_BUCKET, save_path, content, payload.resume.content_type)
+    print(result_path)
+    result.resume = result_path 
+    insert_to_db(result,db_session)
+
+    return JSONResponse(
+      status_code=status.HTTP_200_OK,
+      content = {"Message":"Resume is updated ..!"}
+    )
+  except Exception as e:
+    raise server_exception("Failed to update the job application ..!",e)
+  finally:
+    if db_session:
+      db_session.close()
+
+#*******************************************
+#Job Posts
+#*******************************************
+@app.put("/api/job-posts/{job_post_id}/{job_status}")
+async def update_job_post(job_post_id: int,job_status:str):
+  try:
+    db_session = get_db_session()
+    #Check if job posts exists
+    result = db_session.query(JobPost).filter(JobPost.id == job_post_id).first()
+    if result:
+      result.job_post_status = job_status
+      insert_to_db(result)
+    else:
+      return JSONResponse(
+        status_code= status.HTTP_400_BAD_REQUEST,
+        content={"error" : "Job post not exist"}
+      )
+    return JSONResponse(
+      status_code= status.HTTP_200_OK,
+      content = {"Message":f"{status} updated in Job Post Status .."}
+    )
+  except Exception as e:
+    print(e)
+    raise server_exception("Failed to update job posts : Internal Server Error")
 
 app.mount("/assets", StaticFiles(directory="frontend/build/client/assets"))
 @app.get("/{full_path:path}")
