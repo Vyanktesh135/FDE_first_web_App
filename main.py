@@ -22,6 +22,7 @@ from supabase import Client,create_client
 import string
 import secrets
 from auth import authenticate_admin
+# from httpx import 
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
@@ -512,7 +513,7 @@ async def api_to_get_jobposts(id:int = 0):
     return jobPosts
   
 #*********************************************************************************
-#Job Boards
+#Login Page
 #*********************************************************************************
 class AdminLoginForm(BaseModel):
    username : str
@@ -764,6 +765,7 @@ async def edit_application(id: int ,payload: Annotated[JobApplicationResumeUpdat
   finally:
     if db_session:
       db_session.close()
+
 
 #*******************************************
 #Job Posts
