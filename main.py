@@ -21,12 +21,17 @@ from config import settings
 from supabase import Client,create_client
 import string
 import secrets
-from auth import authenticate_admin
+from auth import authenticate_admin,AdminAuthzMiddleware,AdminSessionMiddleware,delete_admin_session
+from emailer import send_email
+
 # from httpx import 
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 app = FastAPI()
+app.add_middleware(AdminAuthzMiddleware)
+app.add_middleware(AdminSessionMiddleware)
+
 class server_exception(Exception):
   def __init__(self,name):
     self.name = name
@@ -528,6 +533,21 @@ async def admin_login(response: Response, admin_login_form: Annotated[AdminLogin
       return {}
    else:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+@app.post("/api/admin-logout")
+async def admin_login(request: Request, response: Response):
+    delete_admin_session(request.cookies.get("admin_session"))
+    print("Till Here I'm Good")
+    secure = settings.PRODUCTION
+    response.delete_cookie(key="admin_session",
+                           httponly=True,
+                           secure=secure,
+                           samesite="Lax")
+    return{}
+   
+@app.get("/api/me")
+async def me(req: Request):
+  return {"is_admin": req.state.is_admin}
 #*********************************************************************************
 #Job Boards
 #*********************************************************************************
@@ -692,9 +712,13 @@ async def get_all_job_application():
     raise server_exception("Failed to get the details: Internal server error ..!")
 
 @app.post("/api/job-application")
-async def create_application(payload: Annotated[job_application , Form()]):
+async def create_application(payload: Annotated[job_application , Form()],background_tasks: BackgroundTasks):
   try:
-
+    background_tasks.add_task(send_email,
+    payload.email,
+    "Acknowledgement",
+    "We have received your job application"                          
+    )
     #check if Job Post is CLOSED
     result = job_is_closed(payload.job_post_id)
     if result['status']:

@@ -1,4 +1,4 @@
-import { Link,useFetcher } from "react-router";
+import { Link,useFetcher, type ClientLoaderFunctionArgs } from "react-router";
 import {
   Avatar,
   AvatarImage,
@@ -15,11 +15,15 @@ import {
 import { Button } from "~/components/ui/button";
 import "../app.css";
 import type { Route } from "../+types/root";
+import { userContext } from "../context.js";
 
-export async function clientLoader() {
+export async function clientLoader({context} : ClientLoaderFunctionArgs) {
+  const me = context.get(userContext)
+  const isAdmin =  me && me.is_admin
+  console.log(isAdmin)
   const res = await fetch("/api/job_board");
   const job_boards = await res.json();
-  return { job_boards };
+  return { job_boards, isAdmin };
 }
 
 export async function clientAction({request}: Route.ClientActionArgs){
@@ -55,7 +59,10 @@ export default function JobBoards({ loaderData }) {
               Manage your job boards, update their logos, or remove ones you no longer use.
             </p>
           </div>
-
+          
+          {
+          loaderData.isAdmin
+            ? <div className="float-right">
           <Button>
             <Link
               to="/job-boards/new"
@@ -64,6 +71,8 @@ export default function JobBoards({ loaderData }) {
               + Add Job Board
             </Link>
           </Button>
+          </div>
+          : <></>}
         </header>
 
         {/* Table Card */}
@@ -150,6 +159,8 @@ export default function JobBoards({ loaderData }) {
                       {/* Actions */}
                       <TableCell className="align-middle text-right">
                         <div className="flex justify-end gap-2">
+                        {loaderData.isAdmin ?
+                          <div className = "float-right">
                           <button
                             type="button"
                             onClick={() => handleEditLogo(jobBoard)}
@@ -160,7 +171,9 @@ export default function JobBoards({ loaderData }) {
                           Edit logo
                           </Link>
                           </button>
-
+                          </div>: <></> }
+                          
+                          
                           <fetcher.Form method="post"
                           onSubmit={(event) => {
                               const response = confirm(
@@ -172,9 +185,12 @@ export default function JobBoards({ loaderData }) {
                             }}
                           >
                           <input name="job_board_id" type="hidden" value={jobBoard.id}></input>
+                          {loaderData.isAdmin ?
+                          <div className = "float-right">
                           <button
                           className="bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 shadow-sm transition hover:bg-red-500/20 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                           >Delete</button>
+                          </div>: <></>}
                         </fetcher.Form>
                         </div>
                       </TableCell>

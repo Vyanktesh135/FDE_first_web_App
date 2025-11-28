@@ -1,6 +1,5 @@
 import secrets
-
-from fastapi import Request
+from fastapi import Request,status
 from config import settings
 
 admin_sessions = {}
@@ -17,3 +16,24 @@ def authenticate_admin(username, password):
 
 def is_admin(admin_session_token):
     return admin_session_token in admin_sessions
+
+def delete_admin_session(token):
+    print("**************** \n Deleting Session \n********************")
+    del admin_sessions[token]
+
+from starlette.middleware.base import BaseHTTPMiddleware
+class AdminSessionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, handler):
+        admin_session_token = request.cookies.get("admin_session")
+        request.state.is_admin = admin_session_token in admin_sessions
+        response = await handler(request)
+        return response
+
+from fastapi.responses import JSONResponse
+class AdminAuthzMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, handler):
+        if request.method != "GET" and 'job-boards' in request.url.path and \
+            (not hasattr(request.state, "is_admin") or not request.state.is_admin):
+            return JSONResponse({}, status_code=status.HTTP_401_UNAUTHORIZED)
+        response = await handler(request)
+        return response

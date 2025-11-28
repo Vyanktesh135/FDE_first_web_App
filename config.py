@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
     RESEND_API_KEY: str
+    OPENAI_API_KEY: str
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
