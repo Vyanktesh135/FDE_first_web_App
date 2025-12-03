@@ -1,0 +1,17 @@
+# RAG (Retrival Agumented Generation)
+    - Retrival + Generation
+    - Retrive data from Vector data base or Documets(PDF , image , etc..) 
+                    + 
+            User Prompt
+    using above 2 entity LLM generates the output which can say as RAG
+
+Usefull to get the latest and Private data and then process with LLM
+
+## Advanced RAG techniques
+1. Reranking Retrival Chunks (Get the initial retrived some records and ask another smart model or algorithm to reorder it)
+    a. Vector Search = recall (get many pausible candidates)
+    b. Reranker = precision (Sort them by usefulness)
+    
+2. Hypothetical document embedding
+3. Graph RAG
+4. Hybrid RAG = Vector DB + Graph RAG

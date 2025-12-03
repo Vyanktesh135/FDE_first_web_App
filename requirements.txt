@@ -6,3 +6,5 @@ pydantic-settings==2.12.0 # Configuration Settings
 alembic==1.17.2 # Migration Tool
 supabase==2.24.0
 httpx==0.28.1
+langchain==1.1.0 # Langchain framework
+langchain-openai==1.1.0 # Langchain Open AI interface

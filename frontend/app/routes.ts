@@ -10,6 +10,8 @@ export default [
         route('/job-boards/update/logo','routes/job_board_update.tsx'),
         route('/job-application/new/:id','routes/job_new_application.tsx'),
         route('/admin-login','routes/admin_login_form.tsx'),
-        route('/admin-logout','routes/admin_logout_form.tsx')
+        route('/admin-logout','routes/admin_logout_form.tsx'),
+        route('/job-post/new/:job_board_id','routes/job_post_new.tsx')
+        // route('/job-post/new/:job_board_id','routes/job_boards.tsx')
     ])
 ]satisfies RouteConfig;

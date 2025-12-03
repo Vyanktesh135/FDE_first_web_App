@@ -1,0 +1,52 @@
+:#:- Momentum Flywheel - Simple actions - Consistently done - visible results - more people engagement
+
+***********************************************************
+****** LangChain
+***********************************************************
+- Its framework used to build LLM application
+- Main concept is chaining together the multiple components like Models, Prompts, Memory, Agents, Datsource
+
+******** Prompt Templates ***********
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts.few_shot import FewShotPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+
+
+******** Chanining ******************
+- LCEL (Langchain Expression Language)
+- Chaining
+    chain = prompt | model_name
+    chain = chain.invoke()
+
+- Bilding prompts using Pydantic Prompts
+from langchain_core.output_parsers import PydanticOutputParser
+
+******** Langchain Memory ******************
+from langchain_core.chat_history import InMemoryChatHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+
+Runnable with Messagw History
+RunnableWithMessageHistory(
+    chain,
+    get_session_history,
+    input_message_key= 'messages'
+)
+
+************* Langchain COT (Chain of thought) Prompting **************
+
+************** Function calling with OpenAI Responses API *************
+- Function calling is the way for OpenAI model to interface with external system and
+access the data outside their training data
+
+- Flow
+a. Send initial request to model
+b. Model respond with tool invocation (Specifying which tool to call and with wich env)
+c. Application will execute the requested toll on the basis of input parameters
+d. Return tool result to model
+e. Receive the final response, which may be the completion result or additional tool calls.
+
+************** Prompt Chaining *************
+- Prompt chaining - Break complex task into smaller steps.
+(Output of one prompt is going to be input for next prompt)

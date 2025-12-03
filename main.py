@@ -23,7 +23,8 @@ import string
 import secrets
 from auth import authenticate_admin,AdminAuthzMiddleware,AdminSessionMiddleware,delete_admin_session
 from emailer import send_email
-
+from sqlalchemy.exc import IntegrityError 
+from ai import review_application
 # from httpx import 
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
@@ -154,7 +155,7 @@ class job_application(BaseModel):
 
 class JobApplicationResumeUpdate(BaseModel):
    resume : UploadFile = Field(...)
-
+  
 @app.exception_handler(server_exception)
 async def server_exception_handler(request: Request, exc: server_exception):
   error_msg = traceback.format_exc()
@@ -794,6 +795,39 @@ async def edit_application(id: int ,payload: Annotated[JobApplicationResumeUpdat
 #*******************************************
 #Job Posts
 #*******************************************
+class jobPost(BaseModel):
+  title: str = Field(...,min_length = 3, max_length = 100)
+  description: str = Field(...,min_length = 3)
+  job_board_id: int = Field(...,ge=1,el=10)
+  
+@app.post("/api/job-posts")
+async def create_new_job_post(job_post: Annotated[jobPost,Form()]):
+  try:
+    data = JobPost(title = job_post.title, job_board_id = job_post.job_board_id, description = job_post.description)
+    insert_to_db(data)
+  except IntegrityError as e:
+    return JSONResponse(
+      status_code=status.HTTP_400_BAD_REQUEST,
+      content={"Message":"Job board is not exist please provide the correct job boards ..!"}
+    )
+  return JSONResponse(
+    status_code = status.HTTP_200_OK,
+    content = {"message":"New Job post is created ..!"}
+  )
+
+@app.post("/api/review-job-description")
+async def review_job_post(job_post: Annotated[jobPost,Form()]):
+  try:
+    final_description = review_application(job_post.description)
+  except Exception as e:
+    print(e)
+    return server_exception("Internal Server Error : Failed to review job")
+  return JSONResponse(
+    status_code = status.HTTP_200_OK,
+    content = {"description":final_description.overall_summary,
+    "revised_description":final_description.revised_description}
+  )
+
 @app.put("/api/job-posts/{job_post_id}/{job_status}")
 async def update_job_post(job_post_id: int,job_status:str):
   try:

@@ -1,0 +1,9 @@
+# Types of embeddings -
+CountVectorizer
+TF-IDF
+Word2Vec
+ransformer based Embedding
+Cosine Simililarity
+
+#Vector Databases
+1. Maximal Marginal Relevance

@@ -1,0 +1,22 @@
+meta {
+  name: Job Post Review
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{BASE_URL}}/api/review-job-description
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  title: Forward Deployed Engineer 1
+  description: A Forward Deployed Engineer works directly with customers to understand their business challenges and build high-impact technical solutions. The role involves designing, developing, and deploying custom software, integrations, and AI-powered workflows in real-world environments. FDEs collaborate closely with product and engineering teams to adapt products to customer needs and deliver production-grade systems. You will own the entire solution lifecycle—from requirement discovery to deployment and ongoing support. Strong skills in Python/Java/JavaScript, cloud technologies, APIs, and problem-solving are essential. This role requires excellent communication, adaptability, and the ability to work in fast-paced, customer-centric settings. FDEs serve as the bridge between engineering innovation and customer success, ensuring technology delivers measurable business value.
+  job_board_id: 2
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
