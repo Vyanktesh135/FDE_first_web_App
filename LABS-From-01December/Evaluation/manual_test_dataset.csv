@@ -1,0 +1,27 @@
+question,ground_truth,contexts
+What is the primary characteristic of Diabetes Mellitus?,It is characterized by elevated blood glucose levels due to insufficient insulin production or inefficient insulin use.,"1. Diabetes Mellitus
+Diabetes Mellitus is a chronic metabolic disorder characterized by elevated blood glucose levels.
+It occurs when the body cannot produce enough insulin or cannot effectively use the insulin it
+produces.
+Untreated diabetes can lead to complications such as kidney disease, neuropathy, and
+cardiovascular disorders.
+Type 1 diabetes is autoimmune, while Type 2 diabetes is often associated with lifestyle factors."
+Name two long-term complications of untreated diabetes.,Kidney disease and cardiovascular disorders are possible complications.,"1. Diabetes Mellitus
+Diabetes Mellitus is a chronic metabolic disorder characterized by elevated blood glucose levels.
+It occurs when the body cannot produce enough insulin or cannot effectively use the insulin it
+produces.
+Untreated diabetes can lead to complications such as kidney disease, neuropathy, and
+cardiovascular disorders.
+Type 1 diabetes is autoimmune, while Type 2 diabetes is often associated with lifestyle factors."
+What lifestyle factors help manage hypertension?,"Reduced salt intake, regular exercise, and stress management.","2. Hypertension
+Hypertension, commonly known as high blood pressure, is a condition in which the force of blood
+against artery walls is consistently too high.
+Long-term uncontrolled hypertension increases the risk of stroke, heart attack, and kidney failure.
+Lifestyle modifications such as reduced salt intake, regular exercise, and stress management are
+essential.
+Medication may be required in moderate to severe cases."
+How are diabetes and hypertension related?,"People with diabetes have a higher risk of developing hypertension, increasing cardiovascular risk.","3. Relationship Between Diabetes and Hypertension
+People with diabetes have a higher risk of developing hypertension.
+Both disorders together greatly increase the likelihood of cardiovascular complications.
+Managing blood sugar levels, maintaining a healthy weight, and monitoring blood pressure regularly
+are crucial for prevention."

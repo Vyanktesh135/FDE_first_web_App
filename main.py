@@ -1,7 +1,7 @@
 from fastapi import FastAPI,HTTPException
 from fastapi.responses import JSONResponse
 import traceback
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 from fastapi import Request,Response,status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -24,7 +24,7 @@ import secrets
 from auth import authenticate_admin,AdminAuthzMiddleware,AdminSessionMiddleware,delete_admin_session
 from emailer import send_email
 from sqlalchemy.exc import IntegrityError 
-from ai import review_application
+from ai import review_application,ingest_resume_for_recommendataions,get_vector_store,get_recommendation
 # from httpx import 
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
@@ -98,10 +98,10 @@ def job_is_closed(id):
         "post": result.title
       }
     else:
-      return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content = {"Message" : f"Job post id:{result.id} not available please provide the correct one"}
-      )
+      return {
+        "status": True,
+        "post": "unknown"
+      }
   except Exception as e:
     print(e)
     raise server_exception("Failed to check the Job status")
@@ -147,7 +147,7 @@ class JobBoardUpdateLogo(BaseModel):
   logo: UploadFile = Field(...,)
 
 class job_application(BaseModel):
-  job_post_id :int = Field(...,ge=1,le=5)
+  job_post_id :int = Field(...,ge=1,le=500)
   first_name :str =  Field(...,min_length=3,max_length=20)
   last_name :str =  Field(...,min_length=3,max_length=20)
   email : str = Field(...,min_length=3,max_length=40)
@@ -713,7 +713,9 @@ async def get_all_job_application():
     raise server_exception("Failed to get the details: Internal server error ..!")
 
 @app.post("/api/job-application")
-async def create_application(payload: Annotated[job_application , Form()],background_tasks: BackgroundTasks):
+async def create_application(payload: Annotated[job_application , Form()],
+                             background_tasks: BackgroundTasks,
+                             vector_store = Depends(get_vector_store)):
   try:
     background_tasks.add_task(send_email,
     payload.email,
@@ -725,7 +727,7 @@ async def create_application(payload: Annotated[job_application , Form()],backgr
     if result['status']:
       return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"Message":f"Job Post {result['post']} is closed ..!"}
+        content={"Message":f"Job Post is closed ..!"}
       )
 
     #Validate the extension
@@ -748,6 +750,9 @@ async def create_application(payload: Annotated[job_application , Form()],backgr
                           email=payload.email,
                           resume=result_path)
     insert_to_db(data)
+    print("\n\n Application is Added \n\n")
+    background_tasks.add_task(ingest_resume_for_recommendataions, resume_content, 
+                              result_path, data.id, vector_store)
     return JSONResponse(
       status_code=status.HTTP_200_OK,
       content={"Message":f"Application is submitted for job_post_id: {payload.job_post_id}"}
@@ -791,6 +796,19 @@ async def edit_application(id: int ,payload: Annotated[JobApplicationResumeUpdat
     if db_session:
       db_session.close()
 
+@app.get("/api/job-posts/{job_post_id}/recommend")
+async def api_recommend_resume(
+   job_post_id, 
+   vector_store = Depends(get_vector_store)):
+   db = get_db_session()
+   job_post = db.get(JobPost, job_post_id)
+   if not job_post:
+      raise HTTPException(status_code=400)
+   job_description = job_post.description
+   recommended_resume = get_recommendation(job_description, vector_store)   
+   application_id = recommended_resume.metadata["_id"]
+   job_application = db.get(JobApplication, application_id)
+   return job_application
 
 #*******************************************
 #Job Posts

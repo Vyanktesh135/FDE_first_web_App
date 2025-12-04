@@ -1,0 +1,15 @@
+meta {
+  name: Reccomandation
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{BASE_URL}}/api/job-posts/3/recommend
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

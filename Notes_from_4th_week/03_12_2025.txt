@@ -5,5 +5,133 @@ Word2Vec
 ransformer based Embedding
 Cosine Simililarity
 
-#Vector Databases
+********************************************************
+*********** Vector Databases
+********************************************************
+Use chroma from langchain
+Create vector store
+Use vector_store.add_documents()
+do basic query through vector_store.similarity_search(query = "query")
+Score is Cosine distance. Cosine distance = 1 - cosine similarity, so lower the better
+
 1. Maximal Marginal Relevance
+Its design to avoide retriving redundunt chunks 
+
+********************************************************
+# Chuncking statergies for RAG
+********************************************************
+- LLM has limitation on context length so chuncking is IMP
+- Building effective RAG system starts with splitting documnet into meaningfull and searchable chunks
+- Text Splitter
+
+a. Character based splitting
+    Split text into chunks based on specified number of character
+
+b. Sentence based splitting 
+    Splits text into chunk based on sentence, ensuring chunks end at sentence boundaries.
+
+c. Token Based Splitting
+    Splits text into chunks based on tokens (Words or subwords) using tokenizer
+    Usefull for transformers model with struict token limit
+
+d. Recursive character based splitting
+    Attemp to split text at natural baundaries (sentences, paragraphs) within character limit
+
+e. Cutom Splitting
+    Allows creating custom splitting logic based on specific requirements.
+
+********************************************************
+# Finetuning for RAG
+********************************************************
+    1. Chunking - param
+    2. Retriver 
+        search Type
+        search param
+
+********************************************************
+# Generation
+********************************************************
+- Combining the imformation retrived from the indexed chunks with LLM to generate final output
+
+********************************************************
+# Hybrid Retrival QA
+********************************************************
+- Combine two retriver output and get better result
+
+Keyword (Phrase) + vector (semantic - meaning)
+40%                         60%                 - Domain specific - Experiment to fix %
+Weighted average
+
+********************************************************
+## Query Refinement Techniques in RAG pipelines
+********************************************************
+Improves accuracy of RAG on more complex or ambiguous queries
+Query Decomposition - Break into subqueries
+Query Exapnsion - fill up details
+
+Input query -> Query Decomposition Prompt -> Subquery  - as objects ... get()
+
+sub query 1 - Retriver 1 call
+sub query 2 - Retriver 2 call 
+sub query 3 - Retriver 3 call
+
+Final resukt combine all rag result and then use LLM to generate result
+
+
+****************************************************************************************************************
+**** Rag pipeline set up task
+****************************************************************************************************************
+1. Parse the file using appropriate parser
+2. Choose a chunking statergy and split the content
+3. Upload choose chunk somewhere
+4. Generate embedding for each chunk and finally store those embeddings in vector database.
+
+********************************************************
+*********** Types of embedding
+********************************************************
+
+1. # Types of embeddings -
+
+a. CountVectorizer
+    * Type - Classical text representation.
+    * What is does - converts text into vector based on word frequency counts.
+
+    Creates a vocabulary from the corpus
+    Each document becomes a vector where each element = count of word
+
+    * Example
+    Sentence: "I like NLP" → [1, 1, 1]
+    Vocabulary: ["I", "like", "NLP"]
+
+    corpus = ["Embeddings convert text into vectors.", "Vectors can be compared mathematically."]
+                                        :
+                                        :
+    Vocabulary = ['be', 'can', 'compared', 'convert', 'embeddings', 'into', 'mathematically', 'text', 'vectors']
+
+    print(vectorizer.fit_transform(corpus).toarray())
+    Return -->  
+    [[0 0 0 1 1 1 0 1 1]
+    [1 1 1 0 0 0 1 0 1]]
+
+b. TF-IDF (Term Frequency - Invert document frequency)
+    * Type - Weighted statistical embedding
+    * what it does - Mesure how important a word is in a document relative to entire corpus
+
+    * Formula
+    TF * IDF
+    - TF  : How often the word appear in document
+    - IDF : How rare the word is across all documents
+
+    ** Better than CountVectorizer for searching ** 
+    ** Still no semantic understanding: "happy" vs "joyful" treated differently **
+    
+c. Word2vec
+    * Neural static word embedding
+
+
+****************************************************************************************************************
+** Final FLow
+****************************************************************************************************************
+
+Document → Split → Embed → Store in Vector DB → Retrieve Relevant Chunks → LLM → Final Answer
+

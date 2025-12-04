@@ -1,0 +1,30 @@
+Rubber duck debugging
+
+********************************************
+Gaurdials
+********************************************
+- A safety framework - Governs Input LLM Output LLM
+-  to make Large Language Model (LLM) applications secure and reliable.
+- It can automatically validate the user prompts and generated response using configurable validation rule no code change is required 
+
+********************************************
+Evaulation
+********************************************
+- Relavant
+- Precision metric - Correctness of positive pre
+- Recall
+
+** Rag Evaulation Metrix
+Context Precision - Qulity of retrived data (how clean it)
+Context Recall - Completness of retrived data (Did we miss anything)
+Faithfullness  - Does answer match the question (no hallusination) 
+Answer Relevancy - does answer match the question (Useful to user)
+
+** LLM as Judge
+
+*** Evaulation of LLM
+LLM Evaulated using some standard benchmarks
+1. Public benchmarks - (Different for different tasks)
+2. Private benchmarks
+
+** LLM Governance - reliablility and Security
