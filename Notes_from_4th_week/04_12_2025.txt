@@ -1,7 +1,7 @@
 Rubber duck debugging
 
 ********************************************
-Gaurdials
+Guardrails
 ********************************************
 - A safety framework - Governs Input LLM Output LLM
 -  to make Large Language Model (LLM) applications secure and reliable.
@@ -28,3 +28,13 @@ LLM Evaulated using some standard benchmarks
 2. Private benchmarks
 
 ** LLM Governance - reliablility and Security
+- Data Privacy and Confedentiality
+- Fairness and Ethical concerns
+- Model Transperency and Accountability
+- Regular Compliance
+- Safety and Reliability
+
+
+** Guardrails flow
+
+Input --> Input Guardrails --> LLM --> Output Guardrails --> Output

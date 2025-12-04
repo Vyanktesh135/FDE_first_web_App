@@ -5,5 +5,5 @@ services:  # A Docker web service
     plan: free
     autoDeploy: false
     buildCommand: ./build.sh
-    startCommand: uvicorn test:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
  
