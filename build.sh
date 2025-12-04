@@ -4,6 +4,7 @@ set -e
 #backend
 pip install -r requirements.txt
 alembic upgrade head
+python converter.py
 
 # #frontend
 cd frontend
