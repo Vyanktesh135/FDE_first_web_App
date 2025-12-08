@@ -1,0 +1,75 @@
+***** Vector Database -
+doc = Document(resume_text , metadata = {"url" : resume_url})
+Internally this store as below in vectore database
+
+A. Below is example for Single Document 
+    id = resume_id
+    Vector = embedded_data
+    payload = {
+        "actual_text" : "page_content"
+        "url": "resume_url"
+    }
+
+    |───────────────────────────────────────────────────────────────┐
+    │                    QDRANT COLLECTION: "resumes"               │
+    ├───────────────┬─────────────────────┬─────────────────────────┤
+    │     ID        │      VECTOR         │        PAYLOAD          │
+    ├───────────────┼─────────────────────┼─────────────────────────┤
+    │  resume_id    │  [3072-dim vector]  │ {                       │
+    │               │  (embedding)        │   "page_content": "...",│
+    │               │                     │   "url": resume_url     │
+    │               │                     │ }                       │
+    └───────────────┴─────────────────────┴─────────────────────────┘
+
+    |──────────────────────────────────────────────┐
+    │ resume_id                                    │
+    │   ├── embedding: [3072 numbers]              │
+    │   └── payload: {                             │
+    │         "page_content": "...resume text...", │
+    │         "url": "http://something"            │
+    │      }                                       │
+    └──────────────────────────────────────────────┘
+
+B. Lets Understand for multiple Documents
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size = 500 , chunk_overlap = 50)
+    doc = splitter.create_documents([resume_text] , metadata = [{"url" : resume_url}])
+    vector_store.add_document(document = doc, ids = [resume_id])
+
+
+********************************************************************************************
+Performance Enhancement
+********************************************************************************************
+
+A) Ingestion 
+	Splitter --> Embeddings --> Store
+
+    1. Splitter
+        - Chunking is important in 2 way some Embeddings models having token limit here we have to use the chunking so that we will not get out of tokens.
+        - It helps to provide more precise Retrival
+        - Avoide data loss by spliting context too large and too small
+        - Overlaps is there which 
+        - Type
+        Token Based
+        Sentense Based
+        Character Based
+        Recursive Character
+        Custom Splitter
+    
+    2. Embeddings 
+        - This is core intaligent layer for retrival and search
+        - If use it correctly it will help to improve accuracy and speed.
+        - Enables the semantic matching its advantage over traditional way of actual way of words matching.
+        - Vector indexing - (ANN) - Approximate Nearest Neighbour , IVF, PQ/Scalar quantanization, HNSW
+        - Choose a domain specific and usecase specific embedding model
+        - Cache query embeddings
+        ** Good embeddings + good chunking = maximum accuracy **
+
+B) Retrival
+	Vector Store --> Searching --> Retrival
+
+    1. Retrival
+        - Do Hybrid Retrival
+         Vector Search - Semantic similarity
+         BM25 / keyword / full-text search - Exact Match
+        - Use metadata search to reduce search space

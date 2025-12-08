@@ -13,7 +13,7 @@ export async function clientLoader({ params }) {
 
 export default function JobPosts({ loaderData }) {
   const [is_reccomended , setRecom] = useState(false)
-  const [triggered_id,setId] = useState(1)
+  const [triggered_id,setId] = useState([])
   
   const [button_state,setButton] = useState("Reccomend the Applicant")
   const [payload,setPayload] = useState({
@@ -30,7 +30,8 @@ export default function JobPosts({ loaderData }) {
     
     if (resp.ok){
       setRecom(true)
-      setId(job_id)
+      triggered_id.push(job_id)
+      setId(triggered_id)
       setPayload(response)
     }
     else{
@@ -72,6 +73,7 @@ export default function JobPosts({ loaderData }) {
                 Apply Now
               </Link>
 
+              {!triggered_id.includes(jobPost.id)? 
               <div className="text-right">
                 <Button
                   type="button"
@@ -81,81 +83,28 @@ export default function JobPosts({ loaderData }) {
                   {is_reccomended && triggered_id === jobPost.id ? button_state : "Reccomend the Applicant"}
                 </Button>
               </div>
+              :null}
               
-              {is_reccomended && triggered_id === jobPost.id ? (
-                <div className="flex justify-end mt-4">
-                  <div className="w-100 bg-white shadow-lg border border-gray-200 rounded-xl p-4 space-y-3">
-                    <FieldGroup>
-
-                      {/* <Field>
-                        <FieldLabel className="w-full font-medium text-gray-700">
-                          First Name:
-                        <input
-                          placeholder="First Name"
-                          value={payload.first_name}
-                          readOnly
-                          className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
-                        />
-                        </FieldLabel>
-                      </Field>
-
-                      <Field>
-                        <FieldLabel className="font-medium text-gray-700">
-                          Last Name:
-                        <input
-                          placeholder="Last Name"
-                          value={payload.last_name}
-                          readOnly
-                          className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
-                        />
-                        </FieldLabel>
-                      </Field>
-
-                      <Field>
-                        <FieldLabel className="font-medium text-gray-700">
-                          Email:
-                        <input
-                          placeholder="Email"
-                          value={payload.email}
-                          readOnly
-                          className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
-                        />
-                        </FieldLabel>
-                      </Field>
-
-                      <Field>
-                        <FieldLabel className="font-medium text-gray-700">
-                          Applicant ID:
-                        <input
-                          placeholder="ID"
-                          value={payload.id}
-                          readOnly
-                          className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
-                        />
-                        </FieldLabel>
-                      </Field> */}
-
-                      <Field>
-                        <FieldLabel className="font-medium text-gray-700">
-                          Resume Link:
+              {is_reccomended && triggered_id.includes(jobPost.id) ? (
+                <>
+                  <div className="text-right">
                       <Link
                       to = {`${window.location.origin}/${payload.resume}`}
                       target="_blank" 
                       rel="noopener noreferrer"
+                      className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm text-right"
                       >
-                        <input
-                          placeholder="link"
-                          value={payload.resume}
-                          readOnly
-                          className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
-                        />
-                        </Link>
-                         </FieldLabel>
-                      </Field>
-
-                    </FieldGroup>
+                      <input
+                        placeholder="link"
+                        value={payload.resume}
+                        readOnly
+                        className="w-full border rounded-md px-3 py-2 bg-gray-50 text-sm"
+                        type="hidden"
+                      />
+                    Resume Link
+                    </Link>
                   </div>
-                </div>
+                </>
               ) : null}
             </div>
             

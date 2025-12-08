@@ -1,0 +1,46 @@
+-- Use Guardrails.
+-- Use RAG concepts.
+-- How we can take review and update back. (USE MCP and on basis of feedback update the agent performance)
+-- How we can do the data cleaning
+
+Thumb Rules About Vector DB
+1. Store the things which we want to search by meaning
+
+Ask Below questions when we want to store something in Vector DB
+a. Do I need semantic search on this?
+    If yes -> Vector DB
+b. Does it changes frequently ?
+    If yes and not needed for semantic search then store in primary DB
+c. Is it sensetive ?
+    If yes -> Do not embed / store as text
+d. Will I ever need exact lookup , join and transactions on this ?
+    If yes -> Store in primary DB as source of truth. Vector DB as mirror.
+
+
+***********************************************************************************
+************* Application build up
+***********************************************************************************
+
+python -m venv ai_usecase
+ai_usecase/Scripts/activate
+
+npx create-react-router@latest frontend
+cd frontend
+
+npm run dev
+
+vite.config.ts
+    export default defineConfig({
+    server: {
+        proxy:{
+        "/api":{
+            target: "http://localhost:8000",
+            changeOrigin: true,
+            secure: false
+        }
+        }
+    },
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    });
+
+npx shadcn-ui@latest init

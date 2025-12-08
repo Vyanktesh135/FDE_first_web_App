@@ -1,0 +1,65 @@
+***********************************************************************
+*********** Agentic AI
+***********************************************************************
+- Agentic AI : AI system that can take actions autonomously, Pursue goals, 
+and make decisions with minimum human intervention
+- AI system that can act rather than just respond
+- Reasoning + Action is what distinguish Agents from LLM's   
+
+- KEY INGREDIENT
+1. Reasoning and planning capabilities
+2. Tool use and environment interactions
+3. Feedback loop for interactive improved outcomes
+
+
+- TYPICALLY AGENT DESIGN PATTERNS
+    1. SIMPLE REACTIVE STATELESS
+        IF USER ASK X ---> CALL TOOL Y ---> ANSWER
+    2. REACT (reasoning + action)
+        THOUGHT ---> ACTION ---> OBSERVATION ---> REPEAT
+    3. DELIBERATIVE (planning based)
+        PLAN ---> ACT ---> OBSERVE ---> REPLAN
+    4. HYBRID
+        COMBINATION OF AGENTS OF DIFFERENT TYPE
+    5. HIERARCHICAL (MANAGER -> WORKER)
+
+***********************************************************************
+*********** MCP
+***********************************************************************
+- Model Context Protocol
+    - Open standard that defines how AI model communicate with external tools, data 
+    sources, environment.
+    - Think of MCP as the protocol that allows an AI model to:
+        a. Access tools
+        b. Fetch data
+        c. Use external resources
+        d. Maintain context
+        e. Execute actions in a predictable, safe format
+
+***********************************************************************
+*********** OpenAI SDK framework
+***********************************************************************
+- OpenAI SDK framework
+ ┌───────────────────────────────────────┐
+ │            Your Application           │
+ └───────┬───────────────────────────────┘
+         ▼
+ ┌───────────────────────────────────────┐
+ │           OpenAI SDK (Client)         │
+ │ - Models (GPT, Vision, Audio)         │
+ │ - Tools / Function Calling             │
+ │ - Assistants Framework                 │
+ │ - Realtime / Streaming APIs            │
+ │ - Embeddings, Files, Vector Stores     │
+ └───────┬───────────────────────────────┘
+         ▼
+ ┌───────────────────────────────────────┐
+ │       OpenAI Cloud API Services       │
+ └───────────────────────────────────────┘
+
+***********************************************************************
+*********** LLMOps
+***********************************************************************
+- It is the discipline and practice of managing, deploying, monitoring, optimizing, 
+and maintaining LLM-powered applications in production
+

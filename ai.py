@@ -39,6 +39,7 @@ class ReviewedApplication(BaseModel):
 
 
 def review_application(job_description: str) -> ReviewedApplication:
+    print("Reviewing the description")
     ANALYSIS_SYSTEM_PROMPT = """
     You are an expert HR job description analyst specializing in inclusive hiring practices.
 
