@@ -1,0 +1,16 @@
+#Agent as tool
+
+User --> Agent A --> tool call --> Agent B
+     <--         <--           <--
+
+#Handoff
+
+User --> Agent A --> Handoff --> Agent B
+                                    
+    <---------------------------------
+
+User --------------------------------> Agent B
+    <----- Agent A <----- Hand off <--
+
+User ---> Agent A
+     <---

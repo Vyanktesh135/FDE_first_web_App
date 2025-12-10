@@ -13,3 +13,7 @@ langchain-qdrant==1.1.0 # Langchain with Qdrant vector DB
 pypdf==6.4.0 # PDF to Text
 
 pandas==2.3.3
+
+openai-agents==0.6.2
+braintrust[openai-agents]==0.3.12
+braintrust-langchain

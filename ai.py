@@ -10,12 +10,22 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from converter import extract_text_from_pdf_bytes
 from langchain_core.documents import Document
+# from agent import Agent, Runner
+# from agent import function_tool
+# from agent import SQLiteSession
+
+from braintrust import init_logger,traced
+from braintrust_langchain import BraintrustCallbackHandler, set_global_handler
 
 model = ChatOpenAI(
     api_key=settings.OPENAI_API_KEY,
     model="gpt-5.1",
     temperature=0,
 )
+
+init_logger(project="Prodapt", api_key=settings.BRAINTRUST_API_KEY)
+handler = BraintrustCallbackHandler()
+set_global_handler(handler)
 
 class JDAnalysis(BaseModel):
     unclear_sections: List[str]
@@ -37,7 +47,10 @@ class ReviewedApplication(BaseModel):
     revised_description: str
     overall_summary: str
 
+class Skills(BaseModel):
+    skills: list[str]
 
+@traced(name="Review Job Description")
 def review_application(job_description: str) -> ReviewedApplication:
     print("Reviewing the description")
     ANALYSIS_SYSTEM_PROMPT = """
@@ -246,3 +259,24 @@ def get_recommendation(job_description,vector_store):
     retriver = vector_store.as_retriever(search_kwargs = {"k":1})
     result = retriver.invoke(job_description)
     return result[0]
+
+# def extract_skills(job_description) -> Skills:
+#     query = """You are an expert HR analyst and your task is to extract **all relevant skills** from the provided job description.
+
+# ## INSTRUCTIONS
+# - Read the job description carefully.
+# - Identify ALL skills mentioned, including:
+#   - Technical skills
+#   - Soft skills
+#   - Tools & technologies
+#   - Frameworks / libraries
+#   - Programming languages
+#   - Cloud platforms
+#   - Domain-specific skills
+#   - Certifications (if mentioned)
+# - Deduplicate similar skills (e.g., “Python coding” = “Python”).
+# - Do NOT invent skills that are not clearly implied.
+# - Return skills ONLY in a structured JSON array."""
+
+# def take_interview():
+#     session = SQLiteSession("SQL Session ..!")

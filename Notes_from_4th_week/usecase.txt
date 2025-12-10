@@ -1,7 +1,8 @@
 -- Use Guardrails.
--- Use RAG concepts.
+-- Use RAG concepts (Best Embedding and Best Chnuking so that retrival will work in proper way).
 -- How we can take review and update back. (USE MCP and on basis of feedback update the agent performance)
 -- How we can do the data cleaning
+--
 
 Thumb Rules About Vector DB
 1. Store the things which we want to search by meaning

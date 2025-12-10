@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str
     RESEND_API_KEY: str
     OPENAI_API_KEY: str
+    BRAINTRUST_API_KEY: str
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
