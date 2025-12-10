@@ -45,3 +45,10 @@ vite.config.ts
     });
 
 npx shadcn-ui@latest init
+
+
+************************************************
+For future learning purpose - 
+https://github.com/siddhi/fde-prodapt-lab/blob/main/labs/22-llm-judge.md
+
+************************************************
