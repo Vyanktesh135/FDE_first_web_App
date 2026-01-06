@@ -1,0 +1,4 @@
+MCP (Model Context Protocol)
+- Just consider there is some functionality / or tool which is being use by multiple agent 
+we can create separate MCP server and use across multiple agents.
+- Its kind of importing modelue and calling some functionality
